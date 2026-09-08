@@ -492,7 +492,6 @@ If you found this project useful or interesting:
 
 **Mitadru Mridha**
 
-Mechanical Engineering Student @ IIT Bhubaneswar
 Interested in **Machine Learning • MLOps • AI • Data Science**
 
 ### 🔗 Connect With Me
