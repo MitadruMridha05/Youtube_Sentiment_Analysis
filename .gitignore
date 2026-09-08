@@ -5,8 +5,7 @@ __pycache__/
 myvenv/
 # C extensions
 *.so
-artifacts/*.csv
-artifacts
+
 # Distribution / packaging
 .Python
 build/
