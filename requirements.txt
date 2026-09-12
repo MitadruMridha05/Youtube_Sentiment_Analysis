@@ -5,3 +5,5 @@ matplotlib
 seaborn
 nltk
 scikit-learn
+mlflow
+dagshub
