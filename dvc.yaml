@@ -1,0 +1,9 @@
+stages: 
+  data_ingestion:
+    cmd: python pipelines/data/data_ingestion.py
+    deps:
+    - pipelines/data/data_ingestion.py
+    params:
+    - data_ingestion.test_size
+    outs:
+    - data/raw
