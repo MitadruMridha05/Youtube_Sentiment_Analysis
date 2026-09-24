@@ -7,3 +7,28 @@ stages:
     - data_ingestion.test_size
     outs:
     - data/raw
+
+  data_preprocessing:
+    cmd: python pipelines/data/data_preprocessing.py
+    deps:
+      - pipelines/data/data_preprocessing.py
+      - data/raw/train.csv
+      - data/raw/test.csv
+    outs:
+      - data/interim/train_preprocessed.csv
+      - data/interim/test_preprocessed.csv
+
+  model_building:
+    cmd: python pipelines/model/model_building.py
+    deps:
+      - pipelines/model/model_building.py
+      - data/interim/train_preprocessed.csv
+    params:
+      - model_building.max_features
+      - model_building.ngram_range
+      - model_building.learning_rate
+      - model_building.max_depth
+      - model_building.n_estimators
+    outs:
+      - lgbm_model.pkl
+      - tfidf_vectorizer.pkl

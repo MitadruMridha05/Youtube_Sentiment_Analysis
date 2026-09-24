@@ -89,7 +89,7 @@ def main():
 		params = load_params(params_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../params.yaml'))
 		test_size = params['data_ingestion']['test_size']
 
-		df = load_data(data_url=r'C:\Users\mitad\OneDrive\Documents\coding_maxxing\sentiment_analysing_project\artifacts\youtube_comments_cleaned_final.csv')  # replace with your actual source path/URL
+		df = load_data(data_url=r'C:\Users\mitad\OneDrive\Documents\coding_maxxing\sentiment_analysing_project\artifacts\youtube_comments_cleaned.csv')  # replace with your actual source path/URL
 		final_df = preprocess_data(df)
 
 		train_data, test_data = train_test_split(
