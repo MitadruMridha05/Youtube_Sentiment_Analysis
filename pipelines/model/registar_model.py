@@ -64,18 +64,28 @@ def load_data(file_path: str) -> pd.DataFrame:
         logger.error("Unexpected error while loading data: %s", e)
         raise
 
-def sentiment_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
-    """Sentiment is mapped to {-1, 0, 1}, whether it's already numeric
-      (e.g. -1/0/1) or given as text labels (e.g. "positive"/"negative"/"neutral")"""
-    SENTIMENT_LABEL_MAP = {
-        'negative': -1, 'neg': -1, '-1': -1,
-        'neutral': 0, 'neu': 0, '0': 0,
-        'positive': 1, 'pos': 1, '1': 1,
-    }
+
+SENTIMENT_LABEL_MAP = {
+    'negative': -1, 'neg': -1, '-1': -1,
+    'neutral': 0, 'neu': 0, '0': 0,
+    'positive': 1, 'pos': 1, '1': 1,
+}
+
+
+def clean_train_data(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Make sure the training data is safe to model:
+    - CommentText is a non-empty string
+    - Sentiment is mapped to {-1, 0, 1}, whether it's already numeric
+      (e.g. -1/0/1) or given as text labels (e.g. "positive"/"negative"/"neutral")
+    """
     try:
         df = df.copy()
+        df['clean_comment'] = df['clean_comment'].astype(str).str.strip()
+
         # Try numeric first (handles -1/0/1 stored as numbers or numeric strings)
         sentiment_numeric = pd.to_numeric(df['Sentiment'], errors='coerce')
+
         # For whatever didn't parse as a number, map known text labels
         sentiment_mapped = (
             df['Sentiment'].astype(str).str.strip().str.lower().map(SENTIMENT_LABEL_MAP)
@@ -88,21 +98,7 @@ def sentiment_to_numeric(df: pd.DataFrame) -> pd.DataFrame:
             logger.error("Unrecognized Sentiment values found: %s", unknown_values)
 
         df['Sentiment'] = sentiment
-        logger.debug("Converted sentiment into numeric values.")
-        return df
-    except Exception as e:
-        logger.error("Error while coverting sentiments into numeric values: %s", e)
-        raise
 
-
-def clean_train_data(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Make sure the training data is safe to model:
-    - CommentText is a non-empty string
-    """
-    try:
-        df = df.copy()
-        df['clean_comment'] = df['clean_comment'].astype(str).str.strip()
         before = len(df)
         empty_text_count = int((df['clean_comment'] == '').sum())
         missing_sentiment_count = int(df['Sentiment'].isna().sum())
@@ -180,23 +176,6 @@ def save_model(model, file_path: str) -> None:
         logger.error("Error during saving LightGBM model: %s", e)
         raise
 
-def save_data(train_data: pd.DataFrame, test_data: pd.DataFrame, data_path: str) -> None:
-    """Save the processed train and test datasets."""
-    try:
-        interim_data_path = os.path.join(data_path, 'interim')
-        logger.debug(f"Creating directory {interim_data_path}")
-
-        os.makedirs(interim_data_path, exist_ok=True)
-        logger.debug(f"Directory {interim_data_path} created or already exists")
-
-        train_data.to_csv(os.path.join(interim_data_path, "train_preprocessed.csv"), index=False)
-        test_data.to_csv(os.path.join(interim_data_path, "test_preprocessed.csv"), index=False)
-        logger.debug(f"Preprocessed data saved to {interim_data_path}")
-
-    except Exception as e:
-        logger.error(f"Error occurred while saving data: {e}")
-        raise
-
 
 def main():
     try:
@@ -214,15 +193,7 @@ def main():
 
         # 2. Load + clean training data
         train_data = load_data(os.path.join(root_dir, 'data/interim/train_preprocessed.csv'))
-        train_data = sentiment_to_numeric(train_data)
         train_data = clean_train_data(train_data)
-
-        test_data = load_data(os.path.join(root_dir, 'data/interim/test_preprocessed.csv'))
-        test_data = sentiment_to_numeric(test_data)
-
-        save_data(train_data, test_data, data_path='./data')
-
-
 
         # 3. TF-IDF
         x_train_tfidf, y_train = apply_tfidf(train_data, max_features, ngram_range)

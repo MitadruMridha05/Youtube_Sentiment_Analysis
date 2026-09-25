@@ -19,7 +19,7 @@ stages:
       - data/interim/test_preprocessed.csv
 
   model_building:
-    cmd: python pipelines/model/model_building.py
+    cmd: python -m pipelines.model.model_building
     deps:
       - pipelines/model/model_building.py
       - data/interim/train_preprocessed.csv
@@ -34,13 +34,13 @@ stages:
       - tfidf_vectorizer.pkl
 
   model_evaluation:
-    cmd: python src/model/model_evaluation.py
+    cmd: python pipelines/model/model_evaluation.py
     deps:
     - lgbm_model.pkl
     - tfidf_vectorizer.pkl
-    - data/interim/train_processed.csv
-    - data/interim/test_processed.csv
-    - src/model/model_evaluation.py
+    - data/interim/train_preprocessed.csv
+    - data/interim/test_preprocessed.csv
+    - pipelines/model/model_evaluation.py
 
     
     outs:
