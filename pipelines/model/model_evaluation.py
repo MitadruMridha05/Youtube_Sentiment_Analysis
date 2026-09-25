@@ -152,8 +152,8 @@ def main():
             test_data = load_data(os.path.join(root_dir, 'data/interim/test_processed.csv'))
 
             # Prepare test data
-            X_test_tfidf = vectorizer.transform(test_data['clean_comment'].values)
-            y_test = test_data['category'].values
+            X_test_tfidf = vectorizer.transform(test_data['CommentText'].values)
+            y_test = test_data['Sentiment'].values
 
             # Create a DataFrame for signature inference (using first few rows as an example)
             input_example = pd.DataFrame(X_test_tfidf.toarray()[:5], columns=vectorizer.get_feature_names_out())  # <--- Added for signature

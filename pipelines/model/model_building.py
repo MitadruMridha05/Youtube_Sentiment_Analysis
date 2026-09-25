@@ -54,7 +54,7 @@ def load_data(file_path: str) -> pd.DataFrame:
     try:
         df = pd.read_csv(file_path)
         # Fill NaNs only in the text column (filling '' into a numeric column raises on new pandas)
-        df['CommentText'] = df['CommentText'].fillna('')
+        df['clean_comment'] = df['clean_comment'].fillna('')
         logger.debug('Data loaded and text NaNs filled from %s', file_path)
         return df
     except pd.errors.ParserError as e:
@@ -65,24 +65,57 @@ def load_data(file_path: str) -> pd.DataFrame:
         raise
 
 
+SENTIMENT_LABEL_MAP = {
+    'negative': -1, 'neg': -1, '-1': -1,
+    'neutral': 0, 'neu': 0, '0': 0,
+    'positive': 1, 'pos': 1, '1': 1,
+}
+
+
 def clean_train_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Make sure the training data is safe to model:
     - CommentText is a non-empty string
-    - Sentiment is numeric (fillna('') in load_data can turn missing labels into '')
+    - Sentiment is mapped to {-1, 0, 1}, whether it's already numeric
+      (e.g. -1/0/1) or given as text labels (e.g. "positive"/"negative"/"neutral")
     """
     try:
         df = df.copy()
-        df['CommentText'] = df['CommentText'].astype(str).str.strip()
-        df['Sentiment'] = pd.to_numeric(df['Sentiment'], errors='coerce')
+        df['clean_comment'] = df['clean_comment'].astype(str).str.strip()
+
+        # Try numeric first (handles -1/0/1 stored as numbers or numeric strings)
+        sentiment_numeric = pd.to_numeric(df['Sentiment'], errors='coerce')
+
+        # For whatever didn't parse as a number, map known text labels
+        sentiment_mapped = (
+            df['Sentiment'].astype(str).str.strip().str.lower().map(SENTIMENT_LABEL_MAP)
+        )
+        sentiment = sentiment_numeric.where(sentiment_numeric.notna(), sentiment_mapped)
+
+        unmapped_mask = sentiment.isna() & (df['Sentiment'].astype(str).str.strip() != '')
+        if unmapped_mask.any():
+            unknown_values = df.loc[unmapped_mask, 'Sentiment'].unique().tolist()
+            logger.error("Unrecognized Sentiment values found: %s", unknown_values)
+
+        df['Sentiment'] = sentiment
 
         before = len(df)
-        df = df[(df['CommentText'] != '') & df['Sentiment'].notna()].reset_index(drop=True)
+        empty_text_count = int((df['clean_comment'] == '').sum())
+        missing_sentiment_count = int(df['Sentiment'].isna().sum())
+
+        df = df[(df['clean_comment'] != '') & df['Sentiment'].notna()].reset_index(drop=True)
         df['Sentiment'] = df['Sentiment'].astype(int)
 
-        logger.debug("Cleaned training data: %d -> %d rows", before, len(df))
+        logger.debug(
+            "Cleaned training data: %d -> %d rows (dropped %d empty text, %d missing/unrecognized sentiment)",
+            before, len(df), empty_text_count, missing_sentiment_count
+        )
         if df.empty:
-            raise ValueError("Training data is empty after cleaning.")
+            raise ValueError(
+                "Training data is empty after cleaning. Check that 'CommentText' and "
+                "'Sentiment' column names match your CSV, and that Sentiment values are "
+                "one of: -1/0/1 or negative/neutral/positive (case-insensitive)."
+            )
         return df
     except Exception as e:
         logger.error("Error while cleaning training data: %s", e)
@@ -94,7 +127,7 @@ def apply_tfidf(train_data: pd.DataFrame, max_features: int, ngram_range: tuple)
     try:
         vectorizer = TfidfVectorizer(max_features=max_features, ngram_range=ngram_range)
 
-        x_train = train_data['CommentText'].values
+        x_train = train_data['clean_comment'].values
         y_train = train_data["Sentiment"].values
 
         x_train_tfidf = vectorizer.fit_transform(x_train)
