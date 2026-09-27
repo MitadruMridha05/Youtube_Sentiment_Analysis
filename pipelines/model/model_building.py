@@ -132,7 +132,7 @@ def apply_tfidf(train_data: pd.DataFrame, max_features: int, ngram_range: tuple)
         vectorizer = TfidfVectorizer(max_features=max_features, ngram_range=ngram_range)
 
         x_train = train_data['clean_comment'].values
-        y_train = train_data["Sentiment"].values
+        y_train = train_data["Sentiment"].to_numpy(dtype=np.int32)
 
         x_train_tfidf = vectorizer.fit_transform(x_train)
 
@@ -149,24 +149,42 @@ def apply_tfidf(train_data: pd.DataFrame, max_features: int, ngram_range: tuple)
 
 
 def train_lgbm(x_train, y_train: np.ndarray, learning_rate: float, max_depth: int, n_estimators: int) -> lgb.LGBMClassifier:
+
     """Train a LightGBM model."""
+
     try:
+        # Make sure labels are a clean contiguous integer array
+        y_train = np.asarray(y_train, dtype=np.int32).reshape(-1)
+
+        logger.debug("Training data: X shape=%s, X type=%s, y shape=%s, y dtype=%s", x_train.shape, type(x_train), y_train.shape, y_train.dtype)
+
+        logger.debug("Unique labels: %s", np.unique(y_train))
+
         best_model = lgb.LGBMClassifier(
             objective="multiclass",
+            num_class=3,
             metric="multi_logloss",
-            class_weight="balanced",   # handles imbalance (is_unbalance is binary-only, so removed)
+            class_weight="balanced",
             reg_alpha=0.1,
             reg_lambda=0.1,
             learning_rate=learning_rate,
             max_depth=max_depth,
             n_estimators=n_estimators,
-            verbose=-1
+            n_jobs=1,
+            verbosity=-1
         )
+
         best_model.fit(x_train, y_train)
-        logger.debug('LightGBM model training completed')
+
+        logger.debug("LightGBM model training completed")
+
         return best_model
+
     except Exception as e:
-        logger.error("Error during LightGBM model training: %s", e)
+        logger.error(
+            "Error during LightGBM model training: %s",
+            e
+        )
         raise
 
 

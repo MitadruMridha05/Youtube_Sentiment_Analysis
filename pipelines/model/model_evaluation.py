@@ -130,8 +130,8 @@ def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
 def main():
     # Same DagsHub-tracked repo used in the earlier experiment notebooks
     dagshub.init(repo_owner="MitadruMridha05", repo_name="Youtube_Sentiment_Analysis", mlflow=True)
-
-    remote_server_uri = "https://dagshub.com/MitadruMridha05/Youtube_Sentiment_Analysis.mlflow"
+    remote_server_uri = ( "https://dagshub.com/" "MitadruMridha05/" "Youtube_Sentiment_Analysis.mlflow" )
+    #remote_server_uri = "https://dagshub.com/MitadruMridha05/Youtube_Sentiment_Analysis.mlflow"
     mlflow.set_tracking_uri(remote_server_uri)
     
     with mlflow.start_run() as run:
@@ -154,12 +154,17 @@ def main():
             # Prepare test data
             X_test_tfidf = vectorizer.transform(test_data['clean_comment'].values)
             y_test = test_data['Sentiment'].values
-
+            X_signature = X_test_tfidf[:5]
             # Create a DataFrame for signature inference (using first few rows as an example)
-            input_example = pd.DataFrame(X_test_tfidf.toarray()[:5], columns=vectorizer.get_feature_names_out())  # <--- Added for signature
-
+            #input_example = pd.DataFrame(X_test_tfidf.toarray()[:5], columns=vectorizer.get_feature_names_out())  # <--- Added for signature
+            input_example = pd.DataFrame(
+                X_signature.toarray(),
+                columns=vectorizer.get_feature_names_out()
+            )
+            signature_predictions = model.predict(X_signature)
+            signature = infer_signature(input_example, signature_predictions)
             # Infer the signature
-            signature = infer_signature(input_example, model.predict(X_test_tfidf[:5]))  # <--- Added for signature
+            #signature = infer_signature(input_example, model.predict(input_example))
 
             # Log model with signature
             mlflow.sklearn.log_model(
@@ -167,15 +172,10 @@ def main():
                 "lgbm_model",
                 signature=signature,
                 input_example=input_example,
-                skops_trusted_types=[
-                    "collections.OrderedDict",
-                    "lightgbm.basic.Booster",
-                    "lightgbm.sklearn.LGBMClassifier",
-                ],
             )
 
             # Save model info
-            # artifact_uri = mlflow.get_artifact_uri()
+            artifact_uri = mlflow.get_artifact_uri()
             model_path = "lgbm_model"
 
             experiment_info_path = os.path.join(

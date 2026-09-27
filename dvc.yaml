@@ -41,7 +41,12 @@ stages:
     - data/interim/train_preprocessed.csv
     - data/interim/test_preprocessed.csv
     - pipelines/model/model_evaluation.py
-
     
     outs:
     - experiment_info.json
+
+  model_registration:
+    cmd: python pipelines/model/register_model.py
+    deps:
+    - experiment_info.json
+    - pipelines/model/register_model.py
