@@ -503,7 +503,7 @@ Interested in **Machine Learning • MLOps • AI • Data Science**
 
 ## 📜 License
 
-This project is intended for **educational and learning purposes**.
+This project is intended for only **educational and learning purposes**.
 
 If a license file is included in the repository, refer to that license for the applicable terms.
 
