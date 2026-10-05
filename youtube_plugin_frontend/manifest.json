@@ -6,9 +6,13 @@
   "action": {
     "default_popup": "popup.html"
   },
-  "permissions": ["tabs", "activeTab"],
+  "permissions": [
+    "tabs",
+    "activeTab"
+  ],
   "host_permissions": [
-    "http://localhost:5000/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*",
     "https://www.googleapis.com/*"
   ]
 }

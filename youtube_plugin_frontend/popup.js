@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const outputDiv = document.getElementById("output");
 
   // Keep your key out of source control; restrict it to the YouTube Data API in Google Cloud.
-  const API_KEY = "YOUR_YOUTUBE_DATA_API_KEY";
+  const API_KEY = "AIzaSyDw7k-bODEq8-PeGwa_KR9nmzgFnqnXsGw";
   const API_URL = "http://localhost:5000"; // no trailing slash
   const MAX_COMMENTS = 500;
 
@@ -164,18 +164,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function getSentimentPredictions(comments) {
+    const endpoint = `${API_URL}/predict_with_timestamps`;
     try {
-      const response = await fetch(`${API_URL}/predict_with_timestamps`, {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ comments })
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Error fetching predictions");
+      const raw = await response.text();
+      let result;
+      try { result = JSON.parse(raw); } catch { result = null; }
+
+      if (!response.ok || !result) {
+        throw new Error(`Server replied ${response.status}: ${(result && result.error) || raw.slice(0, 120)}`);
+      }
       return result;
     } catch (error) {
       console.error("Error fetching predictions:", error);
-      showError("Couldn't get sentiment predictions. Make sure the backend is running.");
+      showError(`Couldn't get sentiment predictions from ${escapeHtml(endpoint)}.<br>${escapeHtml(error.message)}`);
       return null;
     }
   }
