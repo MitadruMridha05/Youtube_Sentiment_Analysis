@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube Comment Insights</title>
+  <style>
+    :root {
+      --bg: #0f1720;
+      --card: #172230;
+      --border: #243447;
+      --text: #e8eef5;
+      --muted: #8fa3b8;
+      --accent: #2dd4bf;
+      --pos: #4ade80;
+      --neu: #fbbf24;
+      --neg: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body {
+      width: 360px;
+      margin: 0;
+      padding: 14px;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--accent);
+      display: grid; place-items: center;
+      color: var(--bg); font-weight: 700; font-size: 15px;
+    }
+    h1 { font-size: 17px; margin: 0; font-weight: 650; letter-spacing: -0.01em; }
+    p { margin: 6px 0; color: var(--muted); }
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 650;
+      color: var(--accent);
+      margin: 0 0 8px;
+    }
+    .video-id { color: var(--text); font-family: ui-monospace, Consolas, monospace; }
+    /* Metrics */
+    .metrics-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .metric {
+      background: var(--bg);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .metric-title { font-size: 11px; color: var(--muted); }
+    .metric-value { font-size: 20px; font-weight: 700; margin-top: 2px; }
+    .metric-value small { font-size: 12px; font-weight: 500; color: var(--muted); }
+    /* Images */
+    .chart-container img {
+      width: 100%;
+      display: block;
+      margin-top: 8px;
+      border-radius: 8px;
+      background: #fff;
+    }
+    /* Comments */
+    .comment-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .comment-item {
+      background: var(--bg);
+      border-left: 3px solid var(--muted);
+      border-radius: 8px;
+      padding: 8px 10px;
+      overflow-wrap: anywhere;
+    }
+    .comment-item.pos { border-color: var(--pos); }
+    .comment-item.neu { border-color: var(--neu); }
+    .comment-item.neg { border-color: var(--neg); }
+    .comment-sentiment { display: block; margin-top: 4px; font-size: 12px; font-weight: 600; }
+    .pos .comment-sentiment { color: var(--pos); }
+    .neu .comment-sentiment { color: var(--neu); }
+    .neg .comment-sentiment { color: var(--neg); }
+    .error { color: var(--neg); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Y</div>
+    <h1>YouTube Comment Insights</h1>
+  </header>
+  <div id="output"></div>
+  <script src="popup.js"></script>
+</body>
+</html>
