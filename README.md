@@ -1,520 +1,440 @@
-# 🎥 YouTube Sentiment Analysis
+<div align="center">
 
-> **Analyze YouTube audience opinions using Natural Language Processing and Machine Learning.**
+# 🎥 YouTube Comment Sentiment Analysis
 
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge\&logo=python\&logoColor=white)
-![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn-F7931E?style=for-the-badge\&logo=scikit-learn\&logoColor=white)
-![NLP](https://img.shields.io/badge/NLP-Sentiment%20Analysis-8A2BE2?style=for-the-badge)
-![YouTube](https://img.shields.io/badge/YouTube-Data%20Analysis-FF0000?style=for-the-badge\&logo=youtube\&logoColor=white)
-![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-F37626?style=for-the-badge\&logo=jupyter\&logoColor=white)
+### An end-to-end, production-style MLOps project: NLP sentiment classification, a reproducible DVC pipeline, MLflow experiment tracking, a FastAPI inference service, and a browser-extension frontend.
 
----
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Inference_API-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![LightGBM](https://img.shields.io/badge/LightGBM-4.5.0-2E8B57)](https://lightgbm.readthedocs.io/)
+[![MLflow](https://img.shields.io/badge/MLflow-2.17.0-0194E2?logo=mlflow&logoColor=white)](https://mlflow.org/)
+[![DVC](https://img.shields.io/badge/DVC-3.53.0-945DD6?logo=dvc&logoColor=white)](https://dvc.org/)
+[![AWS S3](https://img.shields.io/badge/AWS-S3_Remote_Storage-FF9900?logo=amazonaws&logoColor=white)](https://aws.amazon.com/s3/)
+[![NLTK](https://img.shields.io/badge/NLP-NLTK-4B8BBE)](https://www.nltk.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 📌 Overview
-
-**YouTube Sentiment Analysis** is a Natural Language Processing project designed to understand the overall sentiment expressed in YouTube comments.
-
-The project takes YouTube comment data, preprocesses the text, performs sentiment analysis, and converts unstructured audience feedback into meaningful insights.
-
-Instead of manually reading hundreds or thousands of comments, the system helps identify whether audience reactions are primarily:
-
-* 🟢 **Positive**
-* ⚪ **Neutral**
-* 🔴 **Negative**
-
-This project demonstrates the practical application of **Python, NLP, Machine Learning, text preprocessing, feature engineering, and data visualization** to a real-world dataset.
+</div>
 
 ---
 
-## 🎯 Project Objectives
+## 📑 Table of Contents
 
-The main objectives of this project are:
-
-* 📥 Collect and process YouTube comments
-* 🧹 Clean and preprocess textual data
-* 🔤 Convert natural language into machine-readable features
-* 🤖 Perform sentiment classification
-* 📊 Analyze sentiment distribution
-* 📈 Visualize audience reactions
-* 🔎 Extract meaningful insights from comments
-* 🧠 Demonstrate an end-to-end NLP workflow
+- [Overview](#-overview)
+- [Key Highlights](#-key-highlights)
+- [System Architecture](#-system-architecture)
+- [Tech Stack](#-tech-stack)
+- [ML Pipeline in Detail](#-ml-pipeline-in-detail)
+- [Model Configuration](#-model-configuration)
+- [Model Performance](#-model-performance)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Reproducing the Pipeline](#-reproducing-the-pipeline)
+- [Running the API](#-running-the-api)
+- [API Reference](#-api-reference)
+- [Browser Extension](#-browser-extension)
+- [Experiment Tracking & Model Registry](#-experiment-tracking--model-registry)
+- [Design Decisions](#-design-decisions)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Author](#-author)
 
 ---
 
-## 🔄 Project Workflow
+## 🔍 Overview
 
-```text
-             ┌─────────────────────┐
-             │   YouTube Comments   │
-             └──────────┬──────────┘
-                        │
-                        ▼
-             ┌─────────────────────┐
-             │   Data Collection   │
-             └──────────┬──────────┘
-                        │
-                        ▼
-             ┌─────────────────────┐
-             │ Text Preprocessing  │
-             │                     │
-             │ • Cleaning          │
-             │ • Lowercasing       │
-             │ • Stopwords         │
-             │ • Tokenization      │
-             └──────────┬──────────┘
-                        │
-                        ▼
-             ┌─────────────────────┐
-             │ Feature Extraction  │
-             │                     │
-             │ TF-IDF / NLP        │
-             └──────────┬──────────┘
-                        │
-                        ▼
-             ┌─────────────────────┐
-             │ Sentiment Model     │
-             └──────────┬──────────┘
-                        │
-                        ▼
-          ┌─────────────┼─────────────┐
-          ▼             ▼             ▼
-      🟢 Positive    ⚪ Neutral    🔴 Negative
-          │             │             │
-          └─────────────┼─────────────┘
-                        ▼
-             ┌─────────────────────┐
-             │ Visualization &     │
-             │ Audience Insights   │
-             └─────────────────────┘
+Understanding audience reaction at scale is difficult: popular YouTube videos collect thousands of comments, and reading them manually is impractical. This project automates that analysis.
+
+**YouTube Comment Sentiment Analysis** classifies comments as **Positive**, **Neutral**, or **Negative** and turns the results into actionable visual insight (sentiment distribution, word clouds, and sentiment-over-time trends). It is delivered as a **real-time API consumed by a browser extension**, so insights appear directly alongside the video being watched.
+
+Beyond the model itself, the project is built the way production ML systems are built: **versioned data, parameterised and reproducible pipelines, tracked experiments, a model registry, and a decoupled serving layer.**
+
+| Label | Meaning  |
+| :---: | :------- |
+| `1`   | Positive |
+| `0`   | Neutral  |
+| `-1`  | Negative |
+
+---
+
+## ✨ Key Highlights
+
+- **End-to-end ML lifecycle**: data ingestion → preprocessing → training → evaluation → model registration, orchestrated as a five-stage **DVC pipeline**.
+- **Fully reproducible**: all hyperparameters live in a single `params.yaml`; data and model artifacts are versioned with **DVC** and stored in an **AWS S3** remote.
+- **Experiment tracking and model registry** with **MLflow**, hosted on **DagsHub**. The API loads the registered model directly from the registry at startup.
+- **Production-oriented serving layer** built with **FastAPI**: typed request schemas (Pydantic), input validation, structured error handling, and CORS support.
+- **Thoughtful NLP preprocessing**: negation and contrast words (`not`, `no`, `but`, `however`, `yet`) are deliberately *preserved* when removing stop-words so sentiment polarity is not lost.
+- **Rich analytics endpoints**: sentiment pie chart, word cloud, and monthly sentiment trend graph, all generated server-side.
+- **Thread-safe plotting**: Matplotlib's global state is protected with a lock, since the client requests multiple charts concurrently.
+- **Full-stack delivery**: a browser-extension frontend consumes the API, demonstrating the model in a real user-facing workflow.
+
+---
+
+## 🏗 System Architecture
+
+```mermaid
+flowchart LR
+    subgraph Training["Training & MLOps (DVC pipeline)"]
+        A[Raw Data] --> B[Data Ingestion<br/>train/test split]
+        B --> C[Preprocessing<br/>clean, stop-words, lemmatize]
+        C --> D[Model Building<br/>TF-IDF + LightGBM]
+        D --> E[Model Evaluation]
+        E --> F[Model Registration]
+    end
+
+    subgraph Tracking["Tracking & Storage"]
+        G[(MLflow on DagsHub<br/>Experiments + Registry)]
+        H[(AWS S3<br/>DVC Remote)]
+    end
+
+    subgraph Serving["Serving Layer"]
+        I[FastAPI Service]
+        J[Browser Extension]
+    end
+
+    D -. metrics / params .-> G
+    E -. metrics .-> G
+    F --> G
+    A -. versioned .-> H
+    G -- load registered model --> I
+    J -- comments + timestamps --> I
+    I -- predictions + charts --> J
 ```
 
 ---
 
-## ✨ Key Features
+## 🧰 Tech Stack
 
-### 💬 Comment Analysis
-
-Processes YouTube comments to understand audience sentiment.
-
-### 🧹 Text Preprocessing
-
-Cleans raw comments by handling unnecessary characters, punctuation, stopwords, and other noise.
-
-### 🔤 Feature Engineering
-
-Transforms textual information into numerical features suitable for machine-learning algorithms.
-
-### 🤖 Sentiment Classification
-
-Classifies comments into different sentiment categories.
-
-### 📊 Data Visualization
-
-Provides visual representations of sentiment distribution and audience reactions.
-
-### 🔍 Audience Insights
-
-Makes it easier to understand how viewers are responding to a particular video or topic.
+| Category                 | Tools                                                  |
+| ------------------------ | ------------------------------------------------------ |
+| **Language**             | Python                                                 |
+| **NLP**                  | NLTK (stop-words, WordNet lemmatizer), TF-IDF (n-grams) |
+| **Machine Learning**     | LightGBM, scikit-learn-compatible vectorizer, Joblib   |
+| **Data Processing**      | Pandas, NumPy                                          |
+| **Visualisation**        | Matplotlib, Seaborn, WordCloud                         |
+| **MLOps**                | DVC (pipelines + data versioning), MLflow, DagsHub     |
+| **Cloud / Storage**      | AWS S3 (DVC remote), Boto3                             |
+| **API / Serving**        | FastAPI, Uvicorn, Pydantic                             |
+| **Frontend**             | Browser extension (`youtube_plugin_frontend`)          |
 
 ---
 
-## 🛠️ Technologies Used
+## ⚙️ ML Pipeline in Detail
 
-| Technology              | Purpose                               |
-| ----------------------- | ------------------------------------- |
-| 🐍 **Python**           | Core programming language             |
-| 🐼 **Pandas**           | Data manipulation and analysis        |
-| 🔢 **NumPy**            | Numerical operations                  |
-| 🧠 **Scikit-learn**     | Machine learning & feature extraction |
-| 📝 **NLTK**             | Natural Language Processing           |
-| 📊 **Matplotlib**       | Data visualization                    |
-| 📈 **Seaborn**          | Statistical visualization             |
-| 📓 **Jupyter Notebook** | Development & experimentation         |
-| ▶️ **YouTube Data**     | Source of audience comments           |
+The pipeline is defined in [`dvc.yaml`](dvc.yaml) and consists of five stages. DVC tracks dependencies, parameters, and outputs, so only the stages affected by a change are re-run.
 
----
+| # | Stage                  | Script                                  | Key Outputs                                             |
+| - | ---------------------- | --------------------------------------- | ------------------------------------------------------- |
+| 1 | **Data Ingestion**     | `pipelines/data/data_ingestion.py`      | `data/raw/` (train/test split, configurable `test_size`) |
+| 2 | **Data Preprocessing** | `pipelines/data/data_preprocessing.py`  | `data/interim/train_preprocessed.csv`, `test_preprocessed.csv` |
+| 3 | **Model Building**     | `pipelines/model/model_building.py`     | `lgbm_model.pkl`, `tfidf_vectorizer.pkl`                |
+| 4 | **Model Evaluation**   | `pipelines/model/model_evaluation.py`   | `experiment_info.json` (run metadata for registration)  |
+| 5 | **Model Registration** | `pipelines/model/register_model.py`     | Model version in the MLflow Model Registry              |
 
-## 🧠 NLP Pipeline
+### Text Preprocessing
 
-The project follows a typical Natural Language Processing pipeline:
+Applied identically at training time and at inference time to prevent train/serve skew:
 
-### 1. Data Collection
+1. Lowercase and trim whitespace
+2. Remove newline characters
+3. Strip special characters (keeping `! ? . ,` which carry sentiment signal)
+4. Remove English stop-words, **except** `not`, `no`, `but`, `however`, `yet`
+5. Lemmatize tokens with WordNet
 
-YouTube comments are collected and prepared for analysis.
+### Feature Engineering
 
-### 2. Text Cleaning
-
-Raw comments can contain:
-
-* URLs
-* Punctuation
-* Special characters
-* Numbers
-* Excess whitespace
-* Stopwords
-* Unnecessary symbols
-
-These elements are handled during preprocessing.
-
-### 3. Text Normalization
-
-The text is normalized to create a consistent representation of the comments.
-
-Typical operations include:
-
-```text
-Lowercasing
-     ↓
-Removing unwanted characters
-     ↓
-Removing stopwords
-     ↓
-Tokenization
-     ↓
-Text normalization
-```
-
-### 4. Feature Extraction
-
-Natural language must be converted into numerical features before it can be processed by traditional machine-learning algorithms.
-
-A common approach is **TF-IDF (Term Frequency–Inverse Document Frequency)**.
-
-Conceptually:
-
-```text
-Raw Text
-   ↓
-Clean Text
-   ↓
-TF-IDF Vectorization
-   ↓
-Numerical Feature Matrix
-```
-
-### 5. Sentiment Prediction
-
-The processed features are passed to the sentiment-analysis model to determine the sentiment associated with each comment.
+**TF-IDF** vectorisation with **uni-, bi-, and tri-grams** (`ngram_range: [1, 3]`) to capture short phrases such as *"not good"* or *"really helpful"*, capped at 1,000 features.
 
 ---
 
-## 📊 Results & Visualization
+## 🎛 Model Configuration
 
-The project can be used to generate insights such as:
+All values are centralised in [`params.yaml`](params.yaml) and consumed by the DVC pipeline, so changing a value and running `dvc repro` is all that is needed to run a new experiment.
 
-```text
-Total Comments
-      │
-      ├── 🟢 Positive Comments
-      │
-      ├── ⚪ Neutral Comments
-      │
-      └── 🔴 Negative Comments
+```yaml
+data_ingestion:
+  test_size: 0.20
+
+model_building:
+  ngram_range: [1, 3]
+  max_features: 1000
+  learning_rate: 0.09
+  max_depth: 20
+  n_estimators: 367
 ```
 
-Possible visualizations include:
+---
 
-* 📊 Sentiment distribution
-* 🥧 Sentiment percentage
-* ☁️ Word clouds
-* 📈 Comment statistics
-* 🔝 Most representative comments
+## 📊 Model Performance
+
+> Evaluation metrics are logged to MLflow for every run. Replace the placeholders below with the values from your registered model's run.
+
+| Metric                 | Score |
+| ---------------------- | :---: |
+| Accuracy               | `XX.X%` |
+| Precision (weighted)   | `XX.X%` |
+| Recall (weighted)      | `XX.X%` |
+| F1-score (weighted)    | `XX.X%` |
+
+📎 Full experiment history: [MLflow on DagsHub](https://dagshub.com/MitadruMridha05/Youtube_Sentiment_Analysis.mlflow)
 
 ---
 
 ## 📁 Project Structure
 
-```text
-Youtube_Sentiment_Analysis/
-│
-├── 📓 notebook.ipynb
-│
-├── 📄 README.md
-│
-├── 📊 dataset/
-│   └── comments.csv
-│
-├── 📈 results/
-│   └── visualizations/
-│
-└── 📦 requirements.txt
 ```
-
-> **Note:** Update the structure above to exactly match the files present in your repository.
+Youtube_Sentiment_Analysis/
+├── .dvc/                        # DVC configuration (remote storage settings)
+├── data/                        # Versioned datasets (raw + interim), tracked by DVC
+├── pipelines/
+│   ├── data/
+│   │   ├── data_ingestion.py        # Load data and create train/test split
+│   │   └── data_preprocessing.py    # Text cleaning and normalisation
+│   └── model/
+│       ├── model_building.py        # TF-IDF + LightGBM training
+│       ├── model_evaluation.py      # Metrics and MLflow logging
+│       └── register_model.py        # MLflow Model Registry registration
+├── youtube_plugin_frontend/     # Browser extension that consumes the API
+├── app.py                       # FastAPI inference + visualisation service
+├── dvc.yaml                     # Pipeline definition (5 stages)
+├── dvc.lock                     # Locked pipeline state for reproducibility
+├── params.yaml                  # Centralised hyperparameters
+├── artifacts.dvc                # DVC-tracked model artifacts
+├── requirements.txt             # Python dependencies
+├── setup.py                     # Package setup
+└── README.md
+```
 
 ---
 
 ## 🚀 Getting Started
 
-### 1️⃣ Clone the Repository
+### Prerequisites
+
+- Python 3.10+
+- Git
+- An AWS account with an S3 bucket *(only needed to pull or push DVC-tracked data)*
+- A [DagsHub](https://dagshub.com/) account *(for MLflow tracking and the model registry)*
+
+### Installation
 
 ```bash
-git clone https://github.com/<your-username>/Youtube_Sentiment_Analysis.git
-```
-
-### 2️⃣ Navigate to the Project
-
-```bash
+# 1. Clone the repository
+git clone https://github.com/MitadruMridha05/Youtube_Sentiment_Analysis.git
 cd Youtube_Sentiment_Analysis
-```
 
-### 3️⃣ Create a Virtual Environment
-
-```bash
+# 2. Create and activate a virtual environment
 python -m venv venv
-```
+source venv/bin/activate        # Windows: venv\Scripts\activate
 
-Activate it on Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-On Linux/macOS:
-
-```bash
-source venv/bin/activate
-```
-
-### 4️⃣ Install Dependencies
-
-```bash
+# 3. Install dependencies
 pip install -r requirements.txt
+
+# 4. Download required NLTK resources
+python -c "import nltk; nltk.download('stopwords'); nltk.download('wordnet')"
 ```
 
-### 5️⃣ Run the Project
+### Environment Configuration
 
-If the project is implemented as a Jupyter Notebook:
+Provide credentials through environment variables. **Never commit secrets to the repository.**
 
 ```bash
-jupyter notebook
-```
+# MLflow / DagsHub (needed to load the model from the registry)
+export MLFLOW_TRACKING_USERNAME=<your-dagshub-username>
+export MLFLOW_TRACKING_PASSWORD=<your-dagshub-token>
 
-Then open the project notebook and run the cells sequentially.
-
----
-
-## 📦 Example Requirements
-
-Depending on the implementation, the required libraries may include:
-
-```text
-numpy
-pandas
-scikit-learn
-nltk
-matplotlib
-seaborn
-jupyter
-```
-
-If your implementation uses the YouTube Data API, you may additionally need the appropriate Google API client libraries.
-
----
-
-## 🔐 API Configuration
-
-If the project uses the **YouTube Data API**, create an API key through Google Cloud and keep the key outside your source code.
-
-For example, use an environment variable:
-
-```env
-YOUTUBE_API_KEY=your_api_key_here
-```
-
-### ⚠️ Important
-
-**Never commit your API key to GitHub.**
-
-Add sensitive configuration files to `.gitignore`:
-
-```gitignore
-.env
-*.key
-__pycache__/
-.ipynb_checkpoints/
-venv/
+# AWS (needed for the DVC S3 remote)
+export AWS_ACCESS_KEY_ID=<your-access-key>
+export AWS_SECRET_ACCESS_KEY=<your-secret-key>
+export AWS_DEFAULT_REGION=<your-region>
 ```
 
 ---
 
-## 💡 Example Use Cases
+## 🔁 Reproducing the Pipeline
 
-This project can be useful for:
+```bash
+# Pull versioned data and artifacts from the DVC remote
+dvc pull
 
-### 🎬 Content Creators
+# Run the full pipeline (only stale stages are re-executed)
+dvc repro
 
-Understand audience reactions to videos.
-
-### 📢 Marketing Teams
-
-Analyze public response to promotional content.
-
-### 📺 Media Companies
-
-Measure audience reception of videos and campaigns.
-
-### 📊 Data Analysts
-
-Explore large-scale textual datasets.
-
-### 🤖 ML/NLP Learners
-
-Build practical experience with an end-to-end NLP pipeline.
-
----
-
-## 🧪 Machine Learning Concepts Demonstrated
-
-This project provides practical exposure to:
-
-* Natural Language Processing
-* Text preprocessing
-* Tokenization
-* Stopword removal
-* Feature engineering
-* TF-IDF
-* Supervised learning
-* Sentiment classification
-* Model evaluation
-* Data visualization
-* Exploratory Data Analysis
-
----
-
-## 🔮 Future Improvements
-
-The project can be extended into a more advanced **YouTube Audience Intelligence System**.
-
-### 🚀 Potential upgrades
-
-* [ ] 🌐 Build a Streamlit web application
-* [ ] 🔴 Add real-time YouTube comment analysis
-* [ ] 😊 Add emotion detection
-* [ ] ☣️ Add toxicity detection
-* [ ] 🧠 Experiment with BERT/DistilBERT
-* [ ] 🌍 Add multilingual sentiment analysis
-* [ ] 📊 Create an interactive analytics dashboard
-* [ ] 🔥 Add trending-topic detection
-* [ ] 🗂️ Add comment clustering
-* [ ] 📈 Track sentiment changes over time
-* [ ] ☁️ Deploy the application to the cloud
-* [ ] 🐳 Dockerize the application
-* [ ] ⚙️ Build an automated ML pipeline
-
----
-
-## 📚 Learning Outcomes
-
-Through this project, I gained practical experience in:
-
-```text
-Python
-  ↓
-Data Processing
-  ↓
-Natural Language Processing
-  ↓
-Feature Engineering
-  ↓
-Machine Learning
-  ↓
-Sentiment Analysis
-  ↓
-Data Visualization
-  ↓
-Real-World Data Analysis
+# Visualise the pipeline DAG
+dvc dag
 ```
 
-The project demonstrates how raw social-media-style text can be transformed into structured information and actionable insights.
+To run a new experiment, edit values in `params.yaml` and run `dvc repro` again. DVC detects the change and re-runs only the affected stages.
 
 ---
 
-## 📌 Important Considerations
+## ▶️ Running the API
 
-Sentiment analysis is not perfect.
+```bash
+uvicorn app:app --host 0.0.0.0 --port 5000 --reload
+```
 
-YouTube comments frequently contain:
+On startup the service loads the registered model (`my_model`, version `1`) from the MLflow registry and the persisted `tfidf_vectorizer.pkl`. FastAPI's interactive documentation is then available at:
 
-* Sarcasm 😏
-* Slang
-* Emojis
-* Mixed languages
-* Context-dependent expressions
-* Very short comments
-* Spelling variations
-
-Therefore, sentiment predictions should be interpreted as **automated estimates rather than absolute judgments**.
+- **Swagger UI:** <http://localhost:5000/docs>
+- **ReDoc:** <http://localhost:5000/redoc>
 
 ---
 
-## 🌟 Why This Project Matters
+## 📡 API Reference
 
-YouTube generates an enormous amount of audience feedback every day. Manually analyzing this feedback is difficult and time-consuming.
+### `GET /`
+Health check. Returns a welcome message.
 
-This project demonstrates a simple but powerful idea:
+### `POST /predict`
+Classify a batch of comments.
 
-> **Turn thousands of unstructured comments into measurable audience insights using NLP and Machine Learning.**
+**Request**
+```json
+{
+  "comments": [
+    "This tutorial was incredibly helpful, thank you!",
+    "The audio quality is not good at all.",
+    "I watched this today."
+  ]
+}
+```
 
-It serves as a practical introduction to applying machine learning to real-world textual data.
+**Response**
+```json
+[
+  { "comment": "This tutorial was incredibly helpful, thank you!", "sentiment": 1 },
+  { "comment": "The audio quality is not good at all.", "sentiment": -1 },
+  { "comment": "I watched this today.", "sentiment": 0 }
+]
+```
+
+### `POST /predict_with_timestamps`
+Same as `/predict`, but preserves each comment's timestamp so results can feed the trend graph.
+
+**Request**
+```json
+{
+  "comments": [
+    { "text": "Loved this video!", "timestamp": "2025-03-14T10:30:00Z" }
+  ]
+}
+```
+
+### `POST /generate_chart`
+Returns a **PNG** pie chart of sentiment distribution.
+
+```json
+{ "sentiment_counts": { "1": 120, "0": 45, "-1": 30 } }
+```
+
+### `POST /generate_wordcloud`
+Returns a **PNG** word cloud generated from preprocessed comments.
+
+```json
+{ "comments": ["great content", "very informative", "not clear"] }
+```
+
+### `POST /generate_trend_graph`
+Returns a **PNG** line chart showing the monthly percentage of positive, neutral, and negative comments over time.
+
+```json
+{
+  "sentiment_data": [
+    { "sentiment": 1, "timestamp": "2025-01-15T10:00:00Z" },
+    { "sentiment": -1, "timestamp": "2025-02-03T18:20:00Z" }
+  ]
+}
+```
+
+**Error handling:** all endpoints return a JSON `{"error": "..."}` body with `400` for missing or invalid input and `500` for processing failures.
+
+---
+
+## 🧩 Browser Extension
+
+The [`youtube_plugin_frontend`](youtube_plugin_frontend) directory contains the client that brings the model to the user:
+
+1. Collects the comments (and timestamps) of the video being watched.
+2. Sends them to the FastAPI service.
+3. Renders the sentiment summary, word cloud, and trend graph alongside the video.
+
+**To load it locally (Chrome / Chromium):**
+
+1. Start the API (see [Running the API](#-running-the-api)).
+2. Open `chrome://extensions` and enable **Developer mode**.
+3. Click **Load unpacked** and select the `youtube_plugin_frontend` folder.
+4. Open any YouTube video and launch the extension.
+
+> Make sure the API base URL configured in the extension points to your running backend.
+
+---
+
+## 📈 Experiment Tracking & Model Registry
+
+- **Tracking server:** MLflow, hosted on DagsHub.
+- **Logged per run:** hyperparameters, evaluation metrics, and model artifacts.
+- **Registry:** the evaluation stage writes `experiment_info.json`; the registration stage reads it and promotes the run's model to the registry.
+- **Serving:** `app.py` resolves the model via `models:/<name>/<version>`, so the serving layer is decoupled from training and a new model version can be promoted without changing API code.
+
+---
+
+## 🧠 Design Decisions
+
+| Decision | Rationale |
+| -------- | --------- |
+| **LightGBM over a neural model** | Fast to train and serve, strong on sparse TF-IDF features, and cheap to run for real-time inference. |
+| **N-grams up to trigrams** | Captures negation and short phrases that single words miss. |
+| **Preserving `not`, `no`, `but`, `however`, `yet`** | Standard stop-word lists remove words that flip or qualify sentiment. |
+| **DVC + `params.yaml`** | Experiments are parameter-driven, cached, and reproducible by anyone with repo access. |
+| **Registry-based model loading** | Clear separation between training and serving, with a path to versioned rollouts and rollbacks. |
+| **Plot lock in the API** | Matplotlib's `pyplot` is not thread-safe; serialising plotting avoids corrupted figures under concurrent requests. |
+| **Named-column feature frame at inference** | The MLflow model signature expects named float columns, so features are passed as a DataFrame to satisfy schema enforcement. |
+
+---
+
+## 🗺 Roadmap
+
+- [ ] Add a `Dockerfile` and `docker-compose.yml` for one-command local setup
+- [ ] CI/CD with GitHub Actions (linting, tests, `dvc repro` checks)
+- [ ] Deploy the API to AWS (EC2 / ECS) behind HTTPS
+- [ ] Unit and integration tests (preprocessing, API endpoints)
+- [ ] Restrict CORS to approved origins for production
+- [ ] Benchmark against transformer models (e.g. DistilBERT / RoBERTa)
+- [ ] Multilingual comment support
+- [ ] Model monitoring and data-drift detection
+- [ ] Handle class imbalance more explicitly (class weights / resampling)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, suggestions, and improvements are welcome!
-
-If you have an idea that could improve the project:
+Contributions, issues, and feature requests are welcome.
 
 1. Fork the repository
-2. Create a new branch
-3. Make your changes
-4. Commit your changes
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -m "Add your feature"`
+4. Push to the branch: `git push origin feature/your-feature`
 5. Open a Pull Request
 
 ---
 
-## ⭐ Support
+## 📄 License
 
-If you found this project useful or interesting:
-
-⭐ **Star the repository**
-
-🍴 **Fork the project**
-
-🐛 **Open an issue**
-
-💡 **Suggest an improvement**
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
 ---
 
-## 👨‍💻 Author
+## 👤 Author
 
 **Mitadru Mridha**
 
-Interested in **Machine Learning • MLOps • AI • Data Science**
-
-### 🔗 Connect With Me
-
-* 💼 LinkedIn: [Mitadru Mridha](https://www.linkedin.com/in/mitadru-mridha-4b94a9326)
-* 🐙 GitHub: [MitadruMridha05](https://github.com/MitadruMridha05)
-
----
-
-## 📜 License
-
-This project is intended for only **educational and learning purposes**.
-
-If a license file is included in the repository, refer to that license for the applicable terms.
-
----
+[![GitHub](https://img.shields.io/badge/GitHub-MitadruMridha05-181717?logo=github)](https://github.com/MitadruMridha05)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/your-linkedin-id)
+[![Email](https://img.shields.io/badge/Email-Contact-D14836?logo=gmail&logoColor=white)](mailto:your-email@example.com)
 
 <div align="center">
 
-### 🎥 YouTube Sentiment Analysis
-
-**Turning YouTube comments into meaningful insights with NLP & Machine Learning.**
-
-⭐ **If you like this project, consider giving it a star!** ⭐
+⭐ If you found this project useful, please consider giving it a star!
 
 </div>
