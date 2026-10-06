@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const outputDiv = document.getElementById("output");
 
   // Keep your key out of source control; restrict it to the YouTube Data API in Google Cloud.
-  const API_KEY = "AIzaSyDw7k-bODEq8-PeGwa_KR9nmzgFnqnXsGw";
+  const API_KEY = "YOUR_YOUTUBE_API_KEY_HERE"; // Replace with your actual API key
   const API_URL = "http://localhost:5000"; // no trailing slash
   const MAX_COMMENTS = 500;
 

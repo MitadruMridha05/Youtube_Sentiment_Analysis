@@ -1,0 +1,29 @@
+# Version control and DVC internals
+.git
+.gitignore
+.gitattributes
+.dvc/cache
+.dvc/tmp
+.dvcignore
+
+# Data and pipeline code are not needed to serve the API
+data/
+pipelines/
+youtube_plugin_frontend/
+dvc.yaml
+dvc.lock
+params.yaml
+artifacts.dvc
+
+# Python / environment noise
+__pycache__/
+*.pyc
+venv/
+.venv/
+.env
+*.egg-info/
+.ipynb_checkpoints/
+mlruns/
+
+# Docs
+README.md
